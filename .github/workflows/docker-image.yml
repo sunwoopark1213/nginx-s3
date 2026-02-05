@@ -39,6 +39,10 @@ jobs:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          # Ensure the ECR repository exists (create if missing)
+          aws ecr describe-repositories --repository-names "$ECR_REPOSITORY" --region ${{ secrets.AWS_REGION }} || \
+            aws ecr create-repository --repository-name "$ECR_REPOSITORY" --region ${{ secrets.AWS_REGION }}
+
           docker build ./nginx \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:nginx-$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:nginx-latest
